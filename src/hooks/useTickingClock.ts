@@ -63,7 +63,7 @@ const useTickingClock = (workTime: number, relaxTime: number) => {
     }
   };
 
-  return [time, mode, startClock, pauseClock, restartClock, switchMode] as const;
+  return [time, isActive, mode, startClock, pauseClock, restartClock, switchMode] as const;
 };
 
 export default useTickingClock;

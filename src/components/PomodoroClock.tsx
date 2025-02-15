@@ -1,8 +1,10 @@
 import useTickingClock from "@/hooks/useTickingClock";
 import React from "react";
 
+const clockButtonStyle = "p-2 rounded w-full md:w-1/3 text-white";
+
 export default function PomodoroClock() {
-  const [time, mode, startClock, pauseClock, restartClock, switchMode] = useTickingClock(5, 1);
+  const [time, isActive, mode, startClock, pauseClock, restartClock, switchMode] = useTickingClock(5, 1);
 
   return (
     <section className="font-orbitron">
@@ -14,16 +16,19 @@ export default function PomodoroClock() {
           <p className="pb-2">{mode === "work" ? "Time to work" : "Relax Time"}</p>
         </div>
         <div className="flex md:flex-row flex-col justify-around gap-2">
-          <button className="bg-green-500 p-2 rounded w-full md:w-1/5 text-white" onClick={startClock}>
-            Start
-          </button>
-          <button className="bg-yellow-500 p-2 rounded w-full md:w-1/5 text-white" onClick={pauseClock}>
-            Pause
-          </button>
-          <button className="bg-blue-500 p-2 rounded w-full md:w-1/5 text-white" onClick={restartClock}>
+          {isActive ? (
+            <button className={"bg-yellow-500" + clockButtonStyle} onClick={pauseClock}>
+              Pause
+            </button>
+          ) : (
+            <button className={"bg-green-500 " + clockButtonStyle} onClick={startClock}>
+              Start
+            </button>
+          )}
+          <button className={"bg-blue-500 " + clockButtonStyle} onClick={restartClock}>
             Restart
           </button>
-          <button className="bg-red-500 p-2 rounded w-full md:w-1/3 text-white" onClick={switchMode}>
+          <button className={"bg-red-500 " + clockButtonStyle} onClick={switchMode}>
             Switch Mode
           </button>
         </div>
