@@ -1,6 +1,8 @@
 import uid from "@/lib/uid";
 import React, { useState } from "react";
 
+import { Trash2, Pencil, Plus, Check } from "lucide-react";
+
 type Todo = {
   id: string;
   text: string;
@@ -9,7 +11,7 @@ type Todo = {
 const commonButtonStyles = "px-4 py-2 rounded-lg font-bold text-white";
 
 export default function SimpleTodo() {
-  const [addTodoText, setAddTodoText] = useState("");
+  const [newTodoText, setNewTodoText] = useState("");
 
   const [todos, setTodos] = useState<Todo[]>([
     { text: "Sample Todo", done: false, id: uid() },
@@ -19,7 +21,7 @@ export default function SimpleTodo() {
 
   function addTodo(text: string, done: boolean) {
     setTodos([{ text, done, id: uid() }, ...todos]);
-    setAddTodoText("");
+    setNewTodoText("");
   }
 
   function deleteTodo(id: string) {
@@ -31,13 +33,13 @@ export default function SimpleTodo() {
   }
 
   function updateTodo(id: string, newText: string, done: boolean) {
-    const newTodos = [...todos];
-    const todoIndex = newTodos.findIndex((todo) => todo.id === id);
-    const todoToUpdate = { ...newTodos[todoIndex] };
-    newTodos[todoIndex] = todoToUpdate;
+    const newTodos = structuredClone(todos);
+    const todoToUpdate = newTodos.find((todo) => todo.id === id);
 
-    todoToUpdate.text = newText;
-    todoToUpdate.done = done;
+    if (todoToUpdate) {
+      todoToUpdate.text = newText;
+      todoToUpdate.done = done;
+    }
 
     setTodos(newTodos);
   }
@@ -47,16 +49,17 @@ export default function SimpleTodo() {
       <div className="flex md:flex-row flex-col justify-center gap-2 mb-4 text-xl">
         <input
           type="text"
-          value={addTodoText}
-          onChange={(e) => setAddTodoText(e.target.value)}
+          value={newTodoText}
+          onChange={(e) => setNewTodoText(e.target.value)}
           className="block flex-grow border-2 border-gray-600 rounded-md text-gray-800 text-center"
           placeholder="Add your task"
         />
         <button
-          className={"flex-grow-0 flex-1 bg-green-500 w-full md:w-1/5 " + commonButtonStyles}
-          onClick={() => addTodo(addTodoText, false)}
+          className={"flex-grow-0 flex-1 bg-green-500 w-full md:w-1/5 disabled:bg-green-300 " + commonButtonStyles}
+          onClick={() => addTodo(newTodoText, false)}
+          disabled={newTodoText?.length === 0}
         >
-          ＋
+          <Plus className="mx-auto" />
         </button>
       </div>
       <ul className="font-orbitron list-none">
@@ -107,24 +110,22 @@ function TodoItem({
       />
       {editing ? (
         <>
-          <form className="flex flex-grow flex-1 gap-2" onSubmit={(e) => onSubmitText(e)}>
+          <form className="flex flex-1 gap-2" onSubmit={(e) => onSubmitText(e)}>
             <input
               type="text"
-              className="block flex-grow border-2 border-gray-400 rounded-md text-gray-800 text-center"
+              className="block flex-1 border-2 border-gray-400 rounded-md w-0 text-gray-800 text-center"
               value={innerText}
               onChange={(e) => setInnerText(e.target.value)}
             />
             <button className={"bg-green-500 px-2 py-1 " + commonButtonStyles} type="submit">
-              ✔
+              <Check />
             </button>
           </form>
         </>
       ) : (
         <>
           <span
-            className={
-              "flex-grow flex-1 text-center break-words break-all " + (todo.done ? " line-through text-gray-400" : "")
-            }
+            className={"flex-1 text-center break-words break-all " + (todo.done ? " line-through text-gray-400" : "")}
           >
             {todo.text}
           </span>
@@ -134,12 +135,12 @@ function TodoItem({
               setEditing(true);
             }}
           >
-            ✎
+            <Pencil />
           </button>
         </>
       )}
       <button className={"flex-grow-0 flex-1 bg-red-500 px-2 py-1 " + commonButtonStyles} onClick={deleteTodo}>
-        🗑
+        <Trash2 />
       </button>
     </li>
   );

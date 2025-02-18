@@ -2,31 +2,31 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const useTickingClock = (workTime: number, relaxTime: number) => {
-  const [time, setTime] = useState(workTime * 60);
-  const [mode, setMode] = useState<"work" | "relax">("work");
+type PomodoroMode = "work" | "relax";
+
+const useTickingClock = (workTicks: number, relaxTicks: number, tickRateInMilliseconds: number) => {
+  const [remainingTicksInMode, setRemainingTicksInMode] = useState(workTicks);
+  const [mode, setMode] = useState<PomodoroMode>("work");
   const [isActive, setIsActive] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isActive) {
-      //should be cleared before?, may duplicate on mode switch
-      console.log("intervalRef.current", intervalRef.current);
       intervalRef.current = setInterval(() => {
-        setTime((prevTime) => {
-          if (prevTime > 0) {
-            return prevTime - 1;
+        setRemainingTicksInMode((prevTicks) => {
+          if (prevTicks > 0) {
+            return prevTicks - 1;
           } else {
             if (mode === "work") {
               setMode("relax");
-              return relaxTime * 60;
+              return relaxTicks;
             } else {
               setMode("work");
-              return workTime * 60;
+              return workTicks;
             }
           }
         });
-      }, 10);
+      }, tickRateInMilliseconds);
     } else if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
@@ -36,7 +36,7 @@ const useTickingClock = (workTime: number, relaxTime: number) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, mode, relaxTime, workTime]);
+  }, [isActive, mode, relaxTicks, workTicks, tickRateInMilliseconds]);
 
   const pauseClock = () => {
     setIsActive(false);
@@ -48,22 +48,23 @@ const useTickingClock = (workTime: number, relaxTime: number) => {
 
   const restartClock = () => {
     if (mode == "work") {
-      setTime(workTime * 60);
+      setRemainingTicksInMode(workTicks);
     } else {
-      setTime(relaxTime * 60);
-    }
-  };
-  const switchMode = () => {
-    if (mode == "work") {
-      setMode("relax");
-      setTime(relaxTime * 60);
-    } else {
-      setMode("work");
-      setTime(workTime * 60);
+      setRemainingTicksInMode(relaxTicks);
     }
   };
 
-  return [time, isActive, mode, startClock, pauseClock, restartClock, switchMode] as const;
+  const switchMode = () => {
+    if (mode == "work") {
+      setMode("relax");
+      setRemainingTicksInMode(relaxTicks);
+    } else {
+      setMode("work");
+      setRemainingTicksInMode(workTicks);
+    }
+  };
+
+  return [remainingTicksInMode, isActive, mode, startClock, pauseClock, restartClock, switchMode] as const;
 };
 
 export default useTickingClock;
